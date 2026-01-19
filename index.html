@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be Careful Clicking on QR Codes - Penn</title>
+    <link rel="icon" type="image/png" href="assets/images/penn-shield-logo.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- CSS Reset and Basics --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        :root {
+            --penn-blue: #011F5B;
+            --penn-red: #990000;
+            --penn-gold: #C4B581;
+        }
+
+        h1, h2, h3 {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        .top-header {
+            background-color: var(--penn-blue);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        .logo-container img {
+            height: 60px;
+            width: auto;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 60px 20px;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .main-content h1 {
+            color: var(--penn-blue);
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .main-content h2 {
+            color: var(--penn-blue);
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .category-section {
+            margin-bottom: 30px;
+        }
+
+        .category-title {
+            color: var(--penn-blue);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-title i {
+            color: var(--penn-red);
+        }
+
+        #js-data-container {
+            background-color: #f9f9f9;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .data-item {
+            margin-bottom: 12px;
+            line-height: 1.5;
+            font-size: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .data-label {
+            font-weight: bold;
+            color: var(--penn-blue);
+            min-width: 200px;
+        }
+
+        .data-value {
+            font-family: monospace;
+            color: #555;
+            background-color: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .data-value.warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .data-value.danger {
+            background-color: #f8d7da;
+            color: var(--penn-red);
+        }
+
+        .location-warning {
+            font-size: 0.9rem;
+            color: var(--penn-red);
+            font-style: italic;
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        .warning-banner {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .warning-banner h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .warning-banner p {
+            color: #856404;
+        }
+
+        footer {
+            background-color: var(--penn-blue);
+            color: white;
+            padding: 50px 30px 20px;
+        }
+
+        .footer-columns {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto 30px auto;
+            gap: 30px;
+        }
+
+        .footer-col {
+            flex: 1 1 250px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--penn-gold);
+            padding-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #a4b7dc;
+        }
+
+        #canvas-test {
+            display: none;
+        }
+
+        .presentation-link {
+            display: inline-block;
+            background-color: var(--penn-blue);
+            color: white !important;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .presentation-link:hover {
+            background-color: var(--penn-red);
+            transform: translateY(-2px);
+        }
+
+        .presentation-link i {
+            margin-right: 8px;
+        }
+.rickroll-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.rickroll-overlay.active {
+    display: flex;
+}
+
+.rickroll-content {
+    text-align: center;
+}
+
+.close-rickroll {
+    margin-top: 10px;
+    padding: 10px 30px;
+    background-color: var(--penn-red);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.close-rickroll:hover {
+    background-color: #cc0000;
+}
+    </style>
+</head>
+<body>
+
+    <header class="top-header">
+        <div class="logo-container">
+            <img src="assets/images/penn-shield-logo.png" alt="University of Pennsylvania Shield">
+        </div>
+    </header>
+
+    <main class="main-content">
+        <h1>Be Careful Clicking on QR Codes</h1>
+
+        <div class="warning-banner">
+            <h3><i class="fas fa-exclamation-triangle"></i> This is an Educational Demonstration</h3>
+            <p>All of the information below was collected <strong>just by you visiting this page</strong>. A malicious site could use this data for tracking, fingerprinting, or targeted attacks.</p>
+
+            <!-- AI FIX START -->
+            <p style="margin-top: 15px;">
+                <a href="#" class="presentation-link">
+                    <i class="fas fa-file-powerpoint"></i> View the Presentation
+                </a>
+            </p>
+            <!-- AI FIX STOP -->
+
+        </div>
+
+        <h2>Information We Collected About You</h2>
+
+        <div id="js-data-container">
+            <p>Loading your information...</p>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-columns">
+            <div class="footer-col"></div>
+            <div class="footer-col"></div>
+            <div class="footer-col"></div>
+        </div>
+        <div class="footer-bottom">
+            <span>Copyright © 2026 The University of Pennsylvania</span>
+        </div>
+    </footer>
+
+    <canvas id="canvas-test" width="200" height="50"></canvas>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('js-data-container');
+            container.innerHTML = '';
+
+            function createCategory(title, icon) {
+                const section = document.createElement('div');
+                section.className = 'category-section';
+                section.innerHTML = `<h3 class="category-title"><i class="fas ${icon}"></i> ${title}</h3>`;
+                return section;
+            }
+
+            function createRow(label, value, className = '') {
+                const div = document.createElement('div');
+                div.className = 'data-item';
+                div.innerHTML = `<span class="data-label">${label}</span>
+                                 <span class="data-value ${className}">${value}</span>`;
+                return div;
+            }
+
+            // ===== BROWSER & SYSTEM INFO =====
+            const browserSection = createCategory("Browser & System", "fa-laptop");
+            browserSection.appendChild(createRow("User Agent:", navigator.userAgent));
+            browserSection.appendChild(createRow("Platform:", navigator.platform));
+            browserSection.appendChild(createRow("Browser Language:", navigator.language));
+            browserSection.appendChild(createRow("All Languages:", navigator.languages?.join(', ') || 'N/A'));
+            browserSection.appendChild(createRow("Cookies Enabled:", navigator.cookieEnabled ? "Yes" : "No"));
+            browserSection.appendChild(createRow("Do Not Track:", navigator.doNotTrack === "1" ? "Enabled" : "Disabled or Not Set"));
+            browserSection.appendChild(createRow("Online Status:", navigator.onLine ? "Online" : "Offline"));
+            browserSection.appendChild(createRow("PDF Viewer Built-in:", navigator.pdfViewerEnabled ? "Yes" : "No"));
+            container.appendChild(browserSection);
+
+            // ===== HARDWARE INFO =====
+            const hardwareSection = createCategory("Hardware Fingerprint", "fa-microchip");
+            hardwareSection.appendChild(createRow("CPU Cores:", navigator.hardwareConcurrency || 'N/A'));
+            hardwareSection.appendChild(createRow("Device Memory:", navigator.deviceMemory ? `~${navigator.deviceMemory} GB RAM` : 'N/A'));
+            hardwareSection.appendChild(createRow("Max Touch Points:", navigator.maxTouchPoints || '0'));
+            hardwareSection.appendChild(createRow("Screen Resolution:", `${window.screen.width} x ${window.screen.height} pixels`));
+            hardwareSection.appendChild(createRow("Available Screen:", `${window.screen.availWidth} x ${window.screen.availHeight} pixels`));
+            hardwareSection.appendChild(createRow("Color Depth:", `${window.screen.colorDepth}-bit`));
+            hardwareSection.appendChild(createRow("Pixel Ratio:", window.devicePixelRatio));
+            hardwareSection.appendChild(createRow("Window Size:", `${window.innerWidth} x ${window.innerHeight} pixels`));
+
+            // WebGL Renderer (reveals GPU)
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {
+                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    if (debugInfo) {
+                        hardwareSection.appendChild(createRow("GPU Vendor:", gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL), 'warning'));
+                        hardwareSection.appendChild(createRow("GPU Renderer:", gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL), 'warning'));
+                    }
+                }
+            } catch (e) {
+                hardwareSection.appendChild(createRow("GPU Info:", "Unable to detect"));
+            }
+            container.appendChild(hardwareSection);
+
+            // ===== TIME & LOCATION =====
+            const locationSection = createCategory("Time & Location Clues", "fa-map-marker-alt");
+            locationSection.appendChild(createRow("Timezone:", Intl.DateTimeFormat().resolvedOptions().timeZone, 'warning'));
+            locationSection.appendChild(createRow("Timezone Offset:", `UTC ${new Date().getTimezoneOffset() / -60} hours`));
+            locationSection.appendChild(createRow("Local Time:", new Date().toLocaleString()));
+            locationSection.appendChild(createRow("Locale:", Intl.DateTimeFormat().resolvedOptions().locale));
+            container.appendChild(locationSection);
+
+            // ===== NETWORK INFO =====
+            const networkSection = createCategory("Network Information", "fa-wifi");
+            if (navigator.connection) {
+                const conn = navigator.connection;
+                networkSection.appendChild(createRow("Connection Type:", conn.effectiveType || 'N/A'));
+                networkSection.appendChild(createRow("Downlink Speed:", conn.downlink ? `~${conn.downlink} Mbps` : 'N/A'));
+                networkSection.appendChild(createRow("Round-Trip Time:", conn.rtt ? `~${conn.rtt} ms` : 'N/A'));
+                networkSection.appendChild(createRow("Data Saver Mode:", conn.saveData ? "Enabled" : "Disabled"));
+            } else {
+                networkSection.appendChild(createRow("Network API:", "Not supported by this browser"));
+            }
+            container.appendChild(networkSection);
+
+            // ===== PAGE & REFERRER INFO =====
+            const pageSection = createCategory("How You Got Here", "fa-route");
+            pageSection.appendChild(createRow("Current URL:", window.location.href));
+            pageSection.appendChild(createRow("Referrer:", document.referrer || "(Direct visit or hidden)", document.referrer ? 'warning' : ''));
+            pageSection.appendChild(createRow("History Length:", `${window.history.length} pages in this tab`));
+            container.appendChild(pageSection);
+
+            // ===== CANVAS FINGERPRINT =====
+            const fingerprintSection = createCategory("Browser Fingerprint", "fa-fingerprint");
+            try {
+                const canvas = document.getElementById('canvas-test');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = '#069';
+                ctx.fillText('Hello, Penn! 🎓', 2, 15);
+                ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+                ctx.fillText('Fingerprint test', 4, 30);
+                const dataURL = canvas.toDataURL();
+                const hash = dataURL.split('').reduce((a, b) => {
+                    a = ((a << 5) - a) + b.charCodeAt(0);
+                    return a & a;
+                }, 0);
+                fingerprintSection.appendChild(createRow("Canvas Fingerprint:", Math.abs(hash).toString(16).toUpperCase(), 'danger'));
+                fingerprintSection.appendChild(createRow("What this means:", "This unique ID can track you across sites without cookies", 'danger'));
+            } catch (e) {
+                fingerprintSection.appendChild(createRow("Canvas Fingerprint:", "Unable to generate"));
+            }
+            container.appendChild(fingerprintSection);
+
+            // ===== STORAGE & FEATURES =====
+            const storageSection = createCategory("Storage & Tracking Capabilities", "fa-database");
+            storageSection.appendChild(createRow("Local Storage:", typeof localStorage !== 'undefined' ? "Available" : "Blocked"));
+            storageSection.appendChild(createRow("Session Storage:", typeof sessionStorage !== 'undefined' ? "Available" : "Blocked"));
+            storageSection.appendChild(createRow("IndexedDB:", typeof indexedDB !== 'undefined' ? "Available" : "Blocked"));
+            storageSection.appendChild(createRow("Service Workers:", 'serviceWorker' in navigator ? "Supported" : "Not Supported"));
+            container.appendChild(storageSection);
+
+            // ===== GEOLOCATION (ASYNC) =====
+            const geoSection = createCategory("Precise Location (if permitted)", "fa-crosshairs");
+            if ("geolocation" in navigator) {
+                const geoRow = document.createElement('div');
+                geoRow.className = 'data-item';
+                geoRow.innerHTML = `<span class="data-label">GPS Coordinates:</span>
+                                    <span class="data-value">Requesting permission...</span>
+                                    <div class="location-warning">(Your browser may ask for permission)</div>`;
+                geoSection.appendChild(geoRow);
+                container.appendChild(geoSection);
+
+                const valueSpan = geoRow.querySelector('.data-value');
+                const warningDiv = geoRow.querySelector('.location-warning');
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude.toFixed(5);
+                        const lng = position.coords.longitude.toFixed(5);
+                        const accuracy = position.coords.accuracy.toFixed(0);
+                        valueSpan.textContent = `${lat}, ${lng} (±${accuracy}m)`;
+                        valueSpan.classList.add('danger');
+                        warningDiv.textContent = "⚠️ A malicious site now knows your physical location!";
+                    },
+                    (error) => {
+                        valueSpan.textContent = "Permission denied (Good choice!)";
+                        valueSpan.style.backgroundColor = '#d4edda';
+                        valueSpan.style.color = '#155724';
+                        warningDiv.remove();
+                    },
+                    { timeout: 10000 }
+                );
+            } else {
+                geoSection.appendChild(createRow("Geolocation:", "Not supported"));
+                container.appendChild(geoSection);
+            }
+
+            // ===== BATTERY STATUS (if available) =====
+            if (navigator.getBattery) {
+                try {
+                    const battery = await navigator.getBattery();
+                    const batterySection = createCategory("Battery Status", "fa-battery-half");
+                    batterySection.appendChild(createRow("Battery Level:", `${Math.round(battery.level * 100)}%`, 'warning'));
+                    batterySection.appendChild(createRow("Charging:", battery.charging ? "Yes" : "No"));
+                    if (!battery.charging && battery.dischargingTime !== Infinity) {
+                        batterySection.appendChild(createRow("Time Until Empty:", `${Math.round(battery.dischargingTime / 60)} minutes`));
+                    }
+                    container.appendChild(batterySection);
+                } catch (e) {
+                    // Battery API not available or blocked
+                }
+            }
+        });
+
+    // Rickroll after 10 seconds
+// Rickroll after 10 seconds
+   // Track if user has interacted with the page
+    let userHasInteracted = false;
+
+    document.addEventListener('click', () => { userHasInteracted = true; }, { once: true });
+    document.addEventListener('keydown', () => { userHasInteracted = true; }, { once: true });
+    document.addEventListener('scroll', () => { userHasInteracted = true; }, { once: true });
+
+    const VIDEO_ID = "dQw4w9WgXcQ";
+
+    setTimeout(() => {
+        const modal = document.getElementById('rickroll-modal');
+        const video = document.getElementById('rick-video');
+
+        // Use mute=0 if user interacted, otherwise fall back to muted
+        const muteParam = userHasInteracted ? "mute=0" : "mute=1";
+        video.src = `https://www.youtube.com/embed/${VIDEO_ID}?autoplay=1&${muteParam}&playsinline=1`;
+
+        modal.classList.add('active');
+    }, 5000);
+
+    function closeRickroll() {
+        const modal = document.getElementById('rickroll-modal');
+        const video = document.getElementById('rick-video');
+        video.src = "about:blank";
+        modal.classList.remove('active');
+    }
+    </script>
+
+<!-- Rickroll Modal -->
+<div id="rickroll-modal" class="rickroll-overlay">
+    <div class="rickroll-content">
+
+
+        <iframe
+  id="rick-video"
+  width="560" height="315"
+  src=""
+  title="YouTube video player"
+  frameborder="0"
+  allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowfullscreen>
+</iframe>
+
+        <p style="color: white; margin-top: 15px;">This could have been malware. 🎵</p>
+        <button onclick="closeRickroll()" class="close-rickroll">Close</button>
+    </div>
+
+</div>
+
+</body>
+</html>
